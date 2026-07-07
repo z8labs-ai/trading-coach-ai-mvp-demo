@@ -126,6 +126,7 @@ const elements = {
   riskRadar: document.getElementById('riskRadar'),
   riskScore: document.getElementById('riskScore'),
   riskRadarText: document.getElementById('riskRadarText'),
+  riskScoreBreakdown: document.getElementById('riskScoreBreakdown'),
   heatLoss: document.getElementById('heatLoss'),
   heatTrades: document.getElementById('heatTrades'),
   heatSize: document.getElementById('heatSize'),
@@ -1278,7 +1279,9 @@ async function initializeAuth() {
     state.auth.user = config.user || null;
 
     if (!state.auth.configured) {
-      elements.authGateMessage.textContent = 'Clerk is not configured yet. Add Clerk keys to .env to enable Google login and passkeys.';
+      elements.authGateMessage.textContent = config.required
+        ? 'Backend auth is required, but Clerk is not configured yet. Configure Clerk keys on the backend before connected mode can open.'
+        : 'Static demo mode is ready. Connect a backend later for Google login, passkeys, OpenAI voice, and ProjectX data.';
       elements.localPrototypeMode.hidden = false;
       return;
     }
@@ -1308,7 +1311,7 @@ async function initializeAuth() {
       });
     }
   } catch (error) {
-    elements.authGateMessage.textContent = 'Static demo mode is available. Backend auth, OpenAI voice, and ProjectX data require the local server or a deployed backend.';
+    elements.authGateMessage.textContent = 'Static demo mode is available. Backend auth, OpenAI voice, and ProjectX data require a reachable backend.';
     elements.localPrototypeMode.hidden = false;
   }
 }
@@ -1397,7 +1400,7 @@ function enterLocalPrototypeMode() {
   state.auth.user = null;
   elements.authGate.classList.add('auth-hidden');
   elements.appShell.classList.remove('auth-hidden');
-  setApiMessage('Local prototype mode is active. Configure Clerk to require sign-in for real users.', 'warning');
+  setApiMessage('Static demo mode is active. Real user auth and API data require a backend.', 'warning');
   render();
   refreshApiStatus();
 }
@@ -1761,6 +1764,12 @@ function renderRiskCockpit() {
   elements.riskScore.textContent = risk.score;
   elements.riskRadar.className = `radar-card ${risk.level}`;
   elements.riskRadarText.textContent = risk.message;
+  elements.riskScoreBreakdown.innerHTML = risk.breakdown.map((item) => `
+    <li>
+      <span>${escapeHtml(item.label)}</span>
+      <strong class="${item.level === 'danger' ? 'status-danger' : item.level === 'warning' ? 'status-warn' : 'status-ok'}">${escapeHtml(item.value)}</strong>
+    </li>
+  `).join('');
 
   setHeatCell(elements.heatLoss, 'Loss', risk.lossLabel, risk.lossLevel);
   setHeatCell(elements.heatTrades, 'Trades', risk.tradeLabel, risk.tradeLevel);
@@ -1791,10 +1800,18 @@ function calculateUiRiskState() {
     + (oversize ? 12 : 0)
   ));
   const level = score >= 75 ? 'danger' : score >= 45 ? 'warning' : 'normal';
+  const lossScore = Math.round(lossPercent * 35);
+  const tradeScore = Math.round(tradePercent * 20);
+  const behaviorScore = Math.max(0, score - lossScore - tradeScore);
 
   return {
     score,
     level,
+    breakdown: [
+      { label: 'Loss pressure', value: `${Math.min(100, Math.round(lossPercent * 100))}%`, level: lossPercent >= 1 ? 'danger' : lossPercent >= 0.75 ? 'warning' : 'normal' },
+      { label: 'Trade usage', value: `${Math.min(100, Math.round(tradePercent * 100))}%`, level: tradePercent >= 1 ? 'danger' : tradePercent >= 0.75 ? 'warning' : 'normal' },
+      { label: 'Behavior load', value: `+${behaviorScore}`, level: behaviorScore >= 30 ? 'danger' : behaviorScore >= 12 ? 'warning' : 'normal' }
+    ],
     message: level === 'danger'
       ? 'Risk pressure is high. The system is prioritizing capital protection.'
       : level === 'warning'

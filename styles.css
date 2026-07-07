@@ -72,6 +72,23 @@ body::before {
   line-height: 1.45;
 }
 
+.auth-mode-list {
+  display: grid;
+  gap: 8px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.auth-mode-list li {
+  border: 1px solid rgba(96, 125, 154, 0.28);
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: rgba(7, 10, 16, 0.48);
+  color: #dcecf4;
+  line-height: 1.35;
+}
+
 .clerk-auth-mount {
   margin-top: 18px;
 }
@@ -275,7 +292,7 @@ h3 {
 
 .layout {
   display: grid;
-  grid-template-columns: 1.1fr 1.2fr 1fr;
+  grid-template-columns: 1fr 1fr 0.95fr;
   gap: 14px;
 }
 
@@ -306,19 +323,22 @@ h3 {
 }
 
 .plan-panel {
-  grid-row: span 2;
+  order: 3;
 }
 
 .dashboard-panel {
-  grid-row: span 2;
+  order: 1;
+  grid-column: span 2;
 }
 
 .coach-panel {
+  order: 2;
   min-height: 520px;
 }
 
 .controls-panel {
-  grid-column: 3;
+  order: 4;
+  grid-column: span 2;
 }
 
 .app-shell[data-focus="risk"] .plan-panel,
@@ -545,6 +565,29 @@ input[readonly] {
   font-size: 13px;
   line-height: 1.35;
   text-align: center;
+}
+
+.risk-score-breakdown {
+  display: grid;
+  gap: 7px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.risk-score-breakdown li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  border: 1px solid rgba(96, 125, 154, 0.24);
+  border-radius: 6px;
+  padding: 7px 8px;
+  background: rgba(7, 10, 16, 0.42);
+  font-size: 12px;
+}
+
+.risk-score-breakdown span {
+  color: var(--muted);
 }
 
 @keyframes radarSweep {
@@ -957,6 +1000,25 @@ input[readonly] {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.demo-tools {
+  margin-top: 14px;
+  border: 1px solid rgba(96, 125, 154, 0.28);
+  border-radius: 8px;
+  padding: 10px 12px 12px;
+  background: rgba(7, 10, 16, 0.44);
+}
+
+.demo-tools summary {
+  cursor: pointer;
+  color: #d9edf6;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.demo-tools:not([open]) summary {
+  margin-bottom: 0;
+}
+
 .event-log-header {
   display: flex;
   align-items: center;
@@ -1077,6 +1139,7 @@ textarea:disabled {
     grid-template-columns: 1fr;
   }
 
+  .dashboard-panel,
   .controls-panel {
     grid-column: auto;
   }
@@ -1112,6 +1175,27 @@ textarea:disabled {
   .form-grid,
   .button-grid {
     grid-template-columns: 1fr;
+  }
+
+  .app-shell[data-focus="overview"] .plan-panel,
+  .app-shell[data-focus="overview"] .coach-panel,
+  .app-shell[data-focus="overview"] .controls-panel,
+  .app-shell[data-focus="risk"] .coach-panel,
+  .app-shell[data-focus="risk"] .controls-panel,
+  .app-shell[data-focus="coach"] .plan-panel,
+  .app-shell[data-focus="coach"] .dashboard-panel,
+  .app-shell[data-focus="coach"] .controls-panel,
+  .app-shell[data-focus="logs"] .plan-panel,
+  .app-shell[data-focus="logs"] .dashboard-panel,
+  .app-shell[data-focus="logs"] .coach-panel {
+    display: none;
+  }
+
+  .app-shell[data-focus="risk"] .plan-panel,
+  .app-shell[data-focus="risk"] .dashboard-panel,
+  .app-shell[data-focus="coach"] .coach-panel,
+  .app-shell[data-focus="logs"] .controls-panel {
+    display: block;
   }
 
   .event-log-header {

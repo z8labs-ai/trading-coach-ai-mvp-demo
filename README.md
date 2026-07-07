@@ -31,6 +31,7 @@ The goal is to prove the core product loop:
 - Generates a local end-of-day review with a next-session recommendation.
 - Shows a local event log for adapter, rules, and intervention steps.
 - Shows a command-strip dashboard with protection mode, risk usage, trade capacity, coach state, next action, and session timeline.
+- Prioritizes the live cockpit first, with plan setup, demo tools, reviews, and logs separated into lower-priority areas.
 - Shows a live dashboard inspired by the product vision.
 
 ## What this prototype does not do yet
@@ -129,9 +130,11 @@ Required production rules:
 
 1. Put real keys only in the host's environment variable settings.
 2. Set `ALLOWED_ORIGINS` to the exact frontend origins allowed to call the backend.
-3. Use HTTPS for the deployed backend.
-4. Keep ProjectX read-only until the product is ready for stricter controls.
-5. Do not expose `.env`, broker credentials, or OpenAI keys to the browser.
+3. Set `REQUIRE_AUTH=true` or `NODE_ENV=production` before deploying real OpenAI or ProjectX keys.
+4. Configure Clerk before enabling protected API features in production.
+5. Use HTTPS for the deployed backend.
+6. Keep ProjectX read-only until the product is ready for stricter controls.
+7. Do not expose `.env`, broker credentials, or OpenAI keys to the browser.
 
 Frontend backend selection:
 

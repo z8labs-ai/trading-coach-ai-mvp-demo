@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trading Coach AI MVP</title>
-  <link rel="stylesheet" href="styles.css?v=flash-ui-1">
+  <link rel="stylesheet" href="styles.css?v=cleanup-1">
 </head>
 <body>
   <div id="authGate" class="auth-gate">
@@ -12,8 +12,12 @@
       <p class="eyebrow">Trading Coach AI</p>
       <h1>Protected Trading Command Center</h1>
       <p id="authGateMessage">Checking authentication...</p>
+      <ul class="auth-mode-list">
+        <li>Static demo: simulator, risk logic, coach messages, and UI review.</li>
+        <li>Connected mode: backend auth, OpenAI voice, and ProjectX read-only data.</li>
+      </ul>
       <div id="clerkAuthMount" class="clerk-auth-mount"></div>
-      <button id="localPrototypeMode" type="button" class="secondary">Continue in Local Prototype Mode</button>
+      <button id="localPrototypeMode" type="button" class="secondary">Open Static Demo</button>
     </div>
   </div>
 
@@ -175,12 +179,13 @@
           <div class="radar-card" id="riskRadar">
             <div class="radar-ring">
               <div class="radar-sweep"></div>
-              <div class="radar-core">
+            <div class="radar-core">
                 <span>Risk Score</span>
                 <strong id="riskScore">0</strong>
               </div>
             </div>
             <p id="riskRadarText">Normal operating range.</p>
+            <ul id="riskScoreBreakdown" class="risk-score-breakdown"></ul>
           </div>
           <div class="heat-map">
             <div class="heat-cell" id="heatLoss"><span>Loss</span><strong>Stable</strong></div>
@@ -299,15 +304,18 @@
           </div>
           <p id="apiConnectionMessage" class="api-message">Connect a backend to use real API connections.</p>
         </div>
-        <div class="button-grid">
-          <button id="startSession">Start Session</button>
-          <button id="syncProjectXMock">Sync Mock ProjectX Data</button>
-          <button id="plannedWin">Simulate Planned Win</button>
-          <button id="plannedLoss">Simulate Planned Loss</button>
-          <button id="oversizeTrade">Simulate Oversize Trade</button>
-          <button id="revengeTrade">Simulate Fast Revenge Trade</button>
-          <button id="resetSession" class="danger">Reset Session</button>
-        </div>
+        <details class="demo-tools" open>
+          <summary>Demo Tools</summary>
+          <div class="button-grid">
+            <button id="startSession">Start Session</button>
+            <button id="syncProjectXMock">Sync Mock ProjectX Data</button>
+            <button id="plannedWin">Simulate Planned Win</button>
+            <button id="plannedLoss">Simulate Planned Loss</button>
+            <button id="oversizeTrade">Simulate Oversize Trade</button>
+            <button id="revengeTrade">Simulate Fast Revenge Trade</button>
+            <button id="resetSession" class="danger">Reset Session</button>
+          </div>
+        </details>
         <div class="end-day-review-panel">
           <div class="panel-header">
             <h3>End-of-Day Review</h3>
@@ -339,7 +347,7 @@
       apiBaseUrl: ''
     };
   </script>
-  <script src="app.js?v=backend-1"></script>
+  <script src="app.js?v=cleanup-1"></script>
 </body>
 </html>
 
