@@ -1,0 +1,340 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trading Coach AI MVP</title>
+  <link rel="stylesheet" href="styles.css?v=flash-ui-1">
+</head>
+<body>
+  <div id="authGate" class="auth-gate">
+    <div class="auth-card">
+      <p class="eyebrow">Trading Coach AI</p>
+      <h1>Protected Trading Command Center</h1>
+      <p id="authGateMessage">Checking authentication...</p>
+      <div id="clerkAuthMount" class="clerk-auth-mount"></div>
+      <button id="localPrototypeMode" type="button" class="secondary">Continue in Local Prototype Mode</button>
+    </div>
+  </div>
+
+  <div class="app-shell auth-hidden" id="appShell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Ai Trading Coach</p>
+        <h1>Real-Time Behavioral Risk Manager</h1>
+      </div>
+      <div class="topbar-actions">
+        <div id="userProfileSlot" class="user-profile-slot"></div>
+        <div class="session-pill" id="sessionStatus">Session Idle</div>
+      </div>
+    </header>
+
+    <section class="command-strip" aria-label="Trading command summary">
+      <article class="command-tile">
+        <span>Protection Mode</span>
+        <strong id="guardrailMode">Plan Unlocked</strong>
+        <small id="guardrailDetail">Save and lock the weekly plan before trading.</small>
+      </article>
+      <article class="command-tile meter-tile">
+        <span>Daily Risk Used</span>
+        <strong id="riskUsedText">$0 / $1,250</strong>
+        <div class="meter-track" aria-hidden="true">
+          <div id="riskUsedMeter" class="meter-fill"></div>
+        </div>
+      </article>
+      <article class="command-tile meter-tile">
+        <span>Trade Capacity</span>
+        <strong id="tradeCapacityText">0 / 2 trades</strong>
+        <div class="meter-track" aria-hidden="true">
+          <div id="tradeCapacityMeter" class="meter-fill"></div>
+        </div>
+      </article>
+      <article class="command-tile">
+        <span>Coach State</span>
+        <strong id="coachStateBadge">Normal</strong>
+        <small id="coachStateText">No intervention needed.</small>
+      </article>
+    </section>
+
+    <nav class="focus-tabs" aria-label="Dashboard focus">
+      <button id="focusOverview" type="button" class="active" data-focus="overview">Overview</button>
+      <button id="focusRisk" type="button" data-focus="risk">Risk</button>
+      <button id="focusCoach" type="button" data-focus="coach">Coach</button>
+      <button id="focusLogs" type="button" data-focus="logs">Logs</button>
+    </nav>
+
+    <main class="layout">
+      <section class="panel plan-panel">
+        <div class="panel-header">
+          <h2>Pre-Market Plan</h2>
+          <span>Trader intent</span>
+        </div>
+
+        <form id="planForm" class="plan-form">
+          <div class="form-grid">
+            <label>
+              Account Capital
+              <input id="accountCapital" type="number" value="50000" min="0" step="100">
+            </label>
+            <label>
+              Daily Risk Tier
+              <select id="riskTier">
+                <option value="low">Low Risk - 1%</option>
+                <option value="moderate" selected>Moderate Risk - 2.5%</option>
+                <option value="aggressive">Aggressive Risk - 5%</option>
+                <option value="highAggressive">High Aggressive Risk - 10%</option>
+              </select>
+            </label>
+          </div>
+
+          <label>
+            Market Bias
+            <select id="marketBias">
+              <option>Bullish</option>
+              <option>Bearish</option>
+              <option>Neutral</option>
+            </select>
+          </label>
+
+          <label>
+            Key Zones
+            <input id="keyZones" type="text" value="4532, 4550, 4565" aria-label="Key zones">
+          </label>
+
+          <label>
+            Approved Setups
+            <input id="approvedSetups" type="text" value="Opening range breakout, Pullback to value, VWAP reclaim" aria-label="Approved setups">
+          </label>
+
+          <div class="form-grid">
+            <label>
+              Calculated Max Daily Loss
+              <input id="maxDailyLoss" type="number" value="1250" min="0" readonly>
+            </label>
+            <label>
+              Estimated Risk Per Contract
+              <input id="estimatedRiskPerContract" type="number" value="250" min="0" step="25">
+            </label>
+            <label>
+              Max Contracts
+              <input id="maxContracts" type="number" value="2" min="1">
+            </label>
+            <label>
+              Max Trades
+              <input id="maxTrades" type="number" value="2" min="1">
+            </label>
+            <label>
+              Cooldown After Losses
+              <input id="cooldownAfterLosses" type="number" value="2" min="1">
+            </label>
+          </div>
+
+          <div class="risk-budget-preview">
+            <h3>Risk Budget Check</h3>
+            <ul id="riskBudgetList" class="status-list"></ul>
+          </div>
+
+          <div class="discipline-lock-panel">
+            <div class="panel-header">
+              <h3>Discipline Lock</h3>
+              <span id="disciplineLockStatus">Weekly Plan Unlocked</span>
+            </div>
+            <ul id="lockRulesList" class="status-list"></ul>
+            <div class="button-grid">
+              <button id="lockWeeklyPlan" type="button">Lock Weekly Plan</button>
+              <button id="unlockWeeklyPlan" type="button" class="danger">Sunday Check-In Unlock</button>
+            </div>
+          </div>
+
+          <div class="weekly-review-panel">
+            <div class="panel-header">
+              <h3>Weekly Check-In Review</h3>
+              <span id="weeklyReviewStatus">Not reviewed</span>
+            </div>
+            <strong id="weeklyReviewRecommendation">Run review after a session.</strong>
+            <ul id="weeklyReviewList" class="status-list"></ul>
+            <button id="runWeeklyReview" type="button">Run Weekly Review</button>
+          </div>
+
+          <label>
+            Behavior To Avoid Today
+            <textarea id="behaviorToAvoid" rows="3">No revenge trading after losses. No increasing size to make money back. Only A+ setups.</textarea>
+          </label>
+
+          <button type="submit">Save Plan</button>
+        </form>
+      </section>
+
+      <section class="panel dashboard-panel">
+        <div class="panel-header">
+          <h2>Live Session Dashboard</h2>
+          <span id="clock">--:--:--</span>
+        </div>
+
+        <div class="risk-cockpit">
+          <div class="radar-card" id="riskRadar">
+            <div class="radar-ring">
+              <div class="radar-sweep"></div>
+              <div class="radar-core">
+                <span>Risk Score</span>
+                <strong id="riskScore">0</strong>
+              </div>
+            </div>
+            <p id="riskRadarText">Normal operating range.</p>
+          </div>
+          <div class="heat-map">
+            <div class="heat-cell" id="heatLoss"><span>Loss</span><strong>Stable</strong></div>
+            <div class="heat-cell" id="heatTrades"><span>Trades</span><strong>Room</strong></div>
+            <div class="heat-cell" id="heatSize"><span>Size</span><strong>Inside</strong></div>
+            <div class="heat-cell" id="heatSetup"><span>Setup</span><strong>Aligned</strong></div>
+            <div class="heat-cell" id="heatRevenge"><span>Revenge</span><strong>Low</strong></div>
+            <div class="heat-cell" id="heatCooldown"><span>Cooldown</span><strong>Clear</strong></div>
+          </div>
+        </div>
+
+        <div class="metric-grid">
+          <article class="metric">
+            <span>Daily P&amp;L</span>
+            <strong id="dailyPnl">$0</strong>
+          </article>
+          <article class="metric">
+            <span>Open Position</span>
+            <strong id="positionSize">0</strong>
+          </article>
+          <article class="metric">
+            <span>Trades Today</span>
+            <strong id="tradeCount">0</strong>
+          </article>
+          <article class="metric">
+            <span>Loss Streak</span>
+            <strong id="lossStreak">0</strong>
+          </article>
+        </div>
+
+        <div class="risk-card" id="riskCard">
+          <div>
+            <span>Risk Level</span>
+            <strong id="riskLevel">Low</strong>
+          </div>
+          <p id="riskSummary">You are within your plan.</p>
+        </div>
+
+        <div class="intervention-status" id="interventionStatus">
+          <div>
+            <span>Intervention Status</span>
+            <strong id="interventionName">Normal</strong>
+          </div>
+          <p id="interventionAction">No intervention needed.</p>
+        </div>
+
+        <div class="next-action-card" id="nextActionCard">
+          <span>Next Best Action</span>
+          <strong id="nextActionTitle">Start with the plan.</strong>
+          <p id="nextActionText">Save the pre-market plan, then start the session when ready.</p>
+        </div>
+
+        <div class="reflection-gate" id="reflectionGate">
+          <div class="panel-header">
+            <h3>Coach Check-In Gate</h3>
+            <span id="reflectionStatus">No reflection required.</span>
+          </div>
+          <div id="coachCheckInThread" class="coach-check-in-thread"></div>
+          <label>
+            Reply
+            <textarea id="coachCheckInInput" rows="2" placeholder="Answer the coach's question in one short reply."></textarea>
+          </label>
+          <button id="sendCheckInReply" type="button">Send Reply</button>
+          <ul id="reflectionHistory" class="reflection-history"></ul>
+        </div>
+
+        <div class="split">
+          <div>
+            <h3>Active Rules</h3>
+            <ul id="rulesList" class="status-list"></ul>
+          </div>
+          <div>
+            <h3>Behavior Monitor</h3>
+            <ul id="behaviorList" class="status-list"></ul>
+          </div>
+        </div>
+
+        <div class="session-timeline-wrap">
+          <div class="panel-header">
+            <h3>Session Timeline</h3>
+            <span>Latest trading events</span>
+          </div>
+          <ol id="sessionTimeline" class="session-timeline"></ol>
+        </div>
+      </section>
+
+      <section class="panel coach-panel">
+        <div class="panel-header">
+          <h2>AI Coach Conversation</h2>
+          <span id="escalationLevel">Level 0</span>
+        </div>
+        <div id="coachFeed" class="coach-feed"></div>
+      </section>
+
+      <section class="panel controls-panel">
+        <div class="panel-header">
+          <h2>Simulation Console</h2>
+          <span>No real orders</span>
+        </div>
+        <p class="console-notice">This console is for simulation, read-only sync, and API testing. It cannot place, modify, cancel, or flatten real trades.</p>
+        <p id="adapterStatus">SimulatorAdapter active. ProjectXAdapter: First real API target. TradovateAdapter: Future roadmap.</p>
+        <div class="api-connection-panel">
+          <div class="panel-header">
+            <h3>API Connections</h3>
+            <span id="apiServerStatus">Checking local server</span>
+          </div>
+          <ul class="status-list">
+            <li><span>OpenAI voice</span><strong id="openAiApiStatus">Unknown</strong></li>
+            <li><span>ProjectX data</span><strong id="projectXApiStatus">Unknown</strong></li>
+          </ul>
+          <div class="button-grid">
+            <button id="refreshApiStatus" type="button">Refresh API Status</button>
+            <button id="toggleVoiceCoach" type="button">Start Voice Coach</button>
+            <button id="connectProjectX" type="button">Connect ProjectX</button>
+            <button id="syncProjectXReadOnly" type="button">Sync ProjectX Read-Only</button>
+          </div>
+          <p id="apiConnectionMessage" class="api-message">Run the local server to use real API connections.</p>
+        </div>
+        <div class="button-grid">
+          <button id="startSession">Start Session</button>
+          <button id="syncProjectXMock">Sync Mock ProjectX Data</button>
+          <button id="plannedWin">Simulate Planned Win</button>
+          <button id="plannedLoss">Simulate Planned Loss</button>
+          <button id="oversizeTrade">Simulate Oversize Trade</button>
+          <button id="revengeTrade">Simulate Fast Revenge Trade</button>
+          <button id="resetSession" class="danger">Reset Session</button>
+        </div>
+        <div class="end-day-review-panel">
+          <div class="panel-header">
+            <h3>End-of-Day Review</h3>
+            <span id="endDayReviewStatus">Not reviewed</span>
+          </div>
+          <strong id="endDayReviewRecommendation">Run review after the session.</strong>
+          <p id="endDayReviewSummary">No session summary yet.</p>
+          <ul id="endDayReviewList" class="status-list"></ul>
+          <button id="runEndDayReview" type="button">Run End-of-Day Review</button>
+        </div>
+        <div class="event-log-wrap">
+          <div class="event-log-header">
+            <h3>Event Log</h3>
+            <div class="log-filters" aria-label="Event log filters">
+              <button type="button" class="active" data-log-filter="all">All</button>
+              <button type="button" data-log-filter="trade">Trades</button>
+              <button type="button" data-log-filter="risk">Risk</button>
+              <button type="button" data-log-filter="api">API</button>
+            </div>
+          </div>
+          <ol id="eventLog" class="event-log"></ol>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js?v=flash-ui-1"></script>
+</body>
+</html>
+
