@@ -1213,3 +1213,467 @@ textarea:disabled {
   }
 }
 
+/* Mock-up inspired terminal layout */
+.app-shell {
+  width: 100%;
+  max-width: none;
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr);
+  gap: 0;
+  padding: 0;
+}
+
+.side-rail {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  border-right: 1px solid rgba(54, 197, 255, 0.12);
+  background: linear-gradient(180deg, rgba(5, 12, 20, 0.98), rgba(8, 18, 28, 0.96));
+  padding: 18px 10px;
+}
+
+.brand-lockup {
+  display: grid;
+  gap: 4px;
+  place-items: center;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.brand-lockup strong {
+  font-size: 34px;
+  line-height: 1;
+  color: var(--blue);
+}
+
+.brand-lockup span {
+  color: #dcecf4;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.side-nav {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.side-nav button {
+  min-height: 66px;
+  padding: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  box-shadow: none;
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.side-nav button.active {
+  color: var(--blue);
+  border-color: rgba(54, 197, 255, 0.24);
+  background: rgba(54, 197, 255, 0.1);
+  box-shadow: inset 0 0 18px rgba(54, 197, 255, 0.08);
+}
+
+.terminal-shell {
+  min-width: 0;
+  padding: 14px 14px 22px;
+}
+
+.terminal-shell .topbar {
+  margin-bottom: 12px;
+  padding: 0 0 10px;
+  border: 0;
+  border-bottom: 1px solid rgba(54, 197, 255, 0.14);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.terminal-shell h1 {
+  font-size: 15px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.terminal-shell .eyebrow {
+  margin: 0;
+  color: var(--text);
+  font-size: 23px;
+  letter-spacing: 0;
+}
+
+.terminal-clock,
+.voice-pill,
+.coach-mode-pill {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.voice-pill,
+.coach-mode-pill {
+  min-height: 34px;
+  border: 1px solid rgba(54, 197, 255, 0.25);
+  border-radius: 999px;
+  padding: 8px 12px;
+  background: rgba(8, 18, 28, 0.78);
+  color: var(--blue);
+  box-shadow: none;
+}
+
+.command-strip {
+  display: none;
+}
+
+.mockup-layout {
+  display: grid;
+  grid-template-columns: minmax(360px, 1.15fr) minmax(260px, 0.58fr) minmax(420px, 1.28fr);
+  gap: 10px;
+}
+
+.mock-column {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  min-width: 0;
+}
+
+.mockup-layout .panel {
+  padding: 14px;
+  border-color: rgba(96, 125, 154, 0.24);
+  background: linear-gradient(180deg, rgba(11, 22, 34, 0.94), rgba(6, 13, 21, 0.92));
+  box-shadow: none;
+}
+
+.mockup-layout .panel-header {
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+  border-bottom-color: rgba(96, 125, 154, 0.18);
+}
+
+.mockup-layout h2 {
+  font-size: 13px;
+  text-transform: uppercase;
+}
+
+.account-grid,
+.session-status-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border: 1px solid rgba(96, 125, 154, 0.16);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.account-grid article,
+.session-status-grid article {
+  min-height: 72px;
+  padding: 12px;
+  border-right: 1px solid rgba(96, 125, 154, 0.14);
+  border-bottom: 1px solid rgba(96, 125, 154, 0.14);
+  background: rgba(7, 16, 25, 0.55);
+}
+
+.account-grid article:nth-child(3n),
+.session-status-grid article:nth-child(3n) {
+  border-right: 0;
+}
+
+.account-grid span,
+.session-status-grid span {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.account-grid strong,
+.session-status-grid strong {
+  display: block;
+  color: var(--text);
+  font-size: 20px;
+}
+
+.account-grid article:first-child strong {
+  color: var(--green);
+}
+
+.risk-cockpit {
+  grid-template-columns: 210px 1fr;
+}
+
+.risk-checklist {
+  display: grid;
+  align-content: center;
+  gap: 10px;
+}
+
+.risk-checklist p {
+  margin: 0;
+  color: #dcecf4;
+}
+
+.chart-panel {
+  min-height: 230px;
+}
+
+.performance-chart {
+  min-height: 190px;
+}
+
+.performance-chart svg {
+  width: 100%;
+  min-height: 168px;
+  display: block;
+  border: 1px solid rgba(96, 125, 154, 0.12);
+  border-radius: 8px;
+  background:
+    linear-gradient(90deg, rgba(96, 125, 154, 0.08) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(96, 125, 154, 0.08) 1px, transparent 1px),
+    rgba(7, 16, 25, 0.62);
+  background-size: 64px 32px;
+}
+
+.gain-fill {
+  fill: url(#chartFill);
+}
+
+.gain-line,
+.loss-line {
+  fill: none;
+  stroke-width: 4;
+}
+
+.gain-line {
+  stroke: var(--green);
+}
+
+.loss-line {
+  stroke: var(--red);
+}
+
+.chart-summary,
+.plan-summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.chart-summary span,
+.plan-summary-grid li,
+.plan-summary-grid strong,
+.plan-summary-grid ol {
+  color: #dcecf4;
+  font-size: 13px;
+}
+
+.plan-summary-grid ul,
+.plan-summary-grid ol,
+.coach-focus-list {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.coach-avatar-row {
+  display: grid;
+  grid-template-columns: 58px 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid rgba(54, 197, 255, 0.16);
+  border-radius: 8px;
+  background: rgba(7, 16, 25, 0.52);
+}
+
+.coach-avatar {
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--blue);
+  border: 1px solid rgba(54, 197, 255, 0.5);
+  background: radial-gradient(circle, rgba(54, 197, 255, 0.35), rgba(7, 16, 25, 0.78));
+}
+
+.coach-avatar-row strong {
+  color: var(--green);
+}
+
+.coach-avatar-row p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.coach-focus-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+  color: #dcecf4;
+  font-size: 13px;
+}
+
+.rule-stack {
+  display: grid;
+  gap: 10px;
+}
+
+.rule-stack p {
+  margin: 0;
+  color: #dcecf4;
+  border-bottom: 1px solid rgba(96, 125, 154, 0.13);
+  padding-bottom: 8px;
+}
+
+.plan-panel,
+.backend-drawer {
+  padding: 0;
+}
+
+.plan-panel summary,
+.backend-drawer summary,
+.demo-tools summary {
+  cursor: pointer;
+  padding: 12px 14px;
+  color: #d9edf6;
+  font-weight: 700;
+}
+
+.plan-panel .plan-form,
+.backend-drawer > *:not(summary) {
+  padding: 0 14px 14px;
+}
+
+.coach-panel {
+  min-height: 570px;
+}
+
+.coach-panel .coach-feed {
+  height: 490px;
+}
+
+.coach-panel .message {
+  max-width: 82%;
+  border-color: rgba(54, 197, 255, 0.22);
+  background: rgba(8, 18, 28, 0.82);
+}
+
+.coach-panel .message.warning {
+  border-color: rgba(255, 209, 102, 0.58);
+  background: rgba(82, 57, 13, 0.24);
+}
+
+.coach-panel .message.danger {
+  border-color: rgba(255, 75, 110, 0.68);
+  background: rgba(90, 20, 39, 0.28);
+}
+
+.coach-input-shell {
+  display: grid;
+  grid-template-columns: 1fr 54px;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.coach-input-shell input {
+  opacity: 0.75;
+}
+
+.intervention-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.wide-demo-button {
+  width: 100%;
+  margin-top: 10px;
+}
+
+@media (max-width: 1240px) {
+  .mockup-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .mock-right,
+  .mock-middle,
+  .mock-left {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 760px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .side-rail {
+    position: static;
+    height: auto;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .brand-lockup {
+    margin-bottom: 0;
+  }
+
+  .side-nav {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .side-nav button {
+    min-height: 46px;
+    font-size: 10px;
+  }
+
+  .terminal-shell {
+    padding: 10px;
+  }
+
+  .terminal-shell .topbar,
+  .topbar-actions {
+    display: grid;
+  }
+
+  .account-grid,
+  .session-status-grid,
+  .chart-summary,
+  .plan-summary-grid,
+  .intervention-grid,
+  .risk-cockpit {
+    grid-template-columns: 1fr;
+  }
+
+  .app-shell[data-focus="overview"] .mock-middle,
+  .app-shell[data-focus="overview"] .mock-right,
+  .app-shell[data-focus="risk"] .coach-panel,
+  .app-shell[data-focus="coach"] .mock-left,
+  .app-shell[data-focus="coach"] .mock-middle,
+  .app-shell[data-focus="logs"] .mock-left,
+  .app-shell[data-focus="logs"] .mock-middle,
+  .app-shell[data-focus="logs"] .coach-panel,
+  .app-shell[data-focus="logs"] .reflection-gate,
+  .app-shell[data-focus="logs"] .controls-panel,
+  .app-shell[data-focus="logs"] .session-status-panel {
+    display: none;
+  }
+
+  .app-shell[data-focus="risk"] .mock-left,
+  .app-shell[data-focus="risk"] .mock-middle,
+  .app-shell[data-focus="coach"] .mock-right,
+  .app-shell[data-focus="logs"] .mock-right,
+  .app-shell[data-focus="logs"] .backend-drawer {
+    display: grid;
+  }
+}
+
