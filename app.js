@@ -2172,6 +2172,9 @@ function renderReflectionGate() {
 
   elements.reflectionGate.classList.toggle('active', gateActive);
   elements.reflectionGate.classList.toggle('lockout', lockedOut);
+  if (gateActive) {
+    elements.reflectionGate.open = true;
+  }
   elements.reflectionStatus.textContent = status;
   elements.sendCheckInReply.disabled = !gateActive || !checkIn.isOpen;
   elements.coachCheckInInput.disabled = !gateActive || !checkIn.isOpen;

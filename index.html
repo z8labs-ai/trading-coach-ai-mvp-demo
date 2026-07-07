@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trading Coach AI MVP</title>
-  <link rel="stylesheet" href="styles.css?v=mockup-1">
+  <link rel="stylesheet" href="styles.css?v=mockup-2">
 </head>
 <body>
   <div id="authGate" class="auth-gate">
@@ -79,11 +79,11 @@
 
       <main class="layout mockup-layout">
         <section class="mock-column mock-left">
-          <section class="panel account-panel">
-            <div class="panel-header">
+          <details class="panel account-panel collapsible-panel" open>
+            <summary class="panel-header">
               <h2>Account Overview</h2>
               <span>Live session</span>
-            </div>
+            </summary>
             <div class="account-grid">
               <article>
                 <span>Daily P&amp;L</span>
@@ -110,13 +110,13 @@
                 <strong id="tradeCount">0</strong>
               </article>
             </div>
-          </section>
+          </details>
 
-          <section class="panel dashboard-panel">
-            <div class="panel-header">
+          <details class="panel dashboard-panel collapsible-panel" open>
+            <summary class="panel-header">
               <h2>Risk Status</h2>
               <span id="riskLevel">Low</span>
-            </div>
+            </summary>
             <div class="risk-cockpit">
               <div class="radar-card" id="riskRadar">
                 <div class="radar-ring">
@@ -141,13 +141,13 @@
               </div>
               <p>Behavior monitor is active.</p>
             </div>
-          </section>
+          </details>
 
-          <section class="panel chart-panel">
-            <div class="panel-header">
+          <details class="panel chart-panel collapsible-panel">
+            <summary class="panel-header">
               <h2>Live Performance Chart</h2>
               <span>Demo visual</span>
-            </div>
+            </summary>
             <div class="performance-chart" aria-label="Demo performance chart">
               <svg viewBox="0 0 620 190" role="img" aria-label="Demo equity curve">
                 <defs>
@@ -165,13 +165,13 @@
                 <span>Max Drawdown: <strong class="status-danger">-$350.00</strong></span>
               </div>
             </div>
-          </section>
+          </details>
 
-          <section class="panel plan-summary-card">
-            <div class="panel-header">
+          <details class="panel plan-summary-card collapsible-panel">
+            <summary class="panel-header">
               <h2>Today's Plan Summary</h2>
               <span>Guardrails</span>
-            </div>
+            </summary>
             <div class="plan-summary-grid">
               <ul>
                 <li>Bias: Bullish</li>
@@ -188,15 +188,15 @@
                 </ol>
               </div>
             </div>
-          </section>
+          </details>
         </section>
 
         <section class="mock-column mock-middle">
-          <section class="panel coach-status-panel">
-            <div class="panel-header">
+          <details class="panel coach-status-panel collapsible-panel" open>
+            <summary class="panel-header">
               <h2>AI Coach Status</h2>
               <span id="escalationLevel">Level 0</span>
-            </div>
+            </summary>
             <div id="interventionStatus" class="intervention-status normal">
               <div class="coach-avatar-row">
                 <div class="coach-avatar">AI</div>
@@ -212,13 +212,13 @@
               <li>Follow your plan</li>
               <li>Help you improve</li>
             </ul>
-          </section>
+          </details>
 
-          <section class="panel behavior-panel">
-            <div class="panel-header">
+          <details class="panel behavior-panel collapsible-panel">
+            <summary class="panel-header">
               <h2>Behavior Monitor</h2>
               <span>Real time</span>
-            </div>
+            </summary>
             <ul id="behaviorList" class="status-list"></ul>
             <div class="heat-grid">
               <article id="heatLoss" class="heat-cell"></article>
@@ -228,13 +228,13 @@
               <article id="heatRevenge" class="heat-cell"></article>
               <article id="heatCooldown" class="heat-cell"></article>
             </div>
-          </section>
+          </details>
 
-          <section class="panel active-rules-card">
-            <div class="panel-header">
+          <details class="panel active-rules-card collapsible-panel">
+            <summary class="panel-header">
               <h2>Active Rules</h2>
               <span>Required</span>
-            </div>
+            </summary>
             <div class="rule-stack">
               <p>Max daily loss: $2,000.00</p>
               <p>Max position size: 2 contracts</p>
@@ -242,10 +242,10 @@
               <p>No revenge trades: Active</p>
               <p>Trade plan required: Active</p>
             </div>
-          </section>
+          </details>
 
-          <details class="panel plan-panel">
-            <summary>Pre-Market Plan Setup</summary>
+          <details class="panel plan-panel collapsible-panel">
+            <summary class="panel-header"><h2>Pre-Market Plan Setup</h2><span>Weekly risk</span></summary>
             <form id="planForm" class="plan-form">
               <div class="form-grid">
                 <label>
@@ -325,23 +325,23 @@
         </section>
 
         <section class="mock-column mock-right">
-          <section class="panel coach-panel">
-            <div class="panel-header">
+          <details class="panel coach-panel collapsible-panel" open>
+            <summary class="panel-header">
               <h2>AI Coach Conversation</h2>
               <span>Voice</span>
-            </div>
+            </summary>
             <div id="coachFeed" class="coach-feed"></div>
             <div class="coach-input-shell">
               <input type="text" placeholder="Type your response..." disabled>
               <button type="button" disabled>Send</button>
             </div>
-          </section>
+          </details>
 
-          <section class="panel reflection-gate" id="reflectionGate">
-            <div class="panel-header">
+          <details class="panel reflection-gate collapsible-panel" id="reflectionGate">
+            <summary class="panel-header">
               <h3>Coach Check-In Gate</h3>
               <span id="reflectionStatus">No check-in required.</span>
-            </div>
+            </summary>
             <div id="coachCheckInThread" class="coach-check-in-thread"></div>
             <label>
               Reply
@@ -349,13 +349,13 @@
             </label>
             <button id="sendCheckInReply" type="button">Send Reply</button>
             <ul id="reflectionHistory" class="reflection-history"></ul>
-          </section>
+          </details>
 
-          <section class="panel controls-panel">
-            <div class="panel-header">
+          <details class="panel controls-panel collapsible-panel">
+            <summary class="panel-header">
               <h2>Intervention Controls</h2>
               <span>Demo triggers</span>
-            </div>
+            </summary>
             <p id="adapterStatus" class="adapter-status">Simulator adapter active.</p>
             <div class="button-grid intervention-grid">
               <button id="startSession">Start Session</button>
@@ -366,28 +366,30 @@
               <button id="resetSession" class="danger">Reset Session</button>
             </div>
             <button id="syncProjectXMock" type="button" class="wide-demo-button">Sync Mock ProjectX Data</button>
-          </section>
+          </details>
 
-          <section id="nextActionCard" class="panel next-action-card">
-            <span>Next Best Action</span>
-            <strong id="nextActionTitle">Follow the plan</strong>
-            <p id="nextActionText">No action required yet.</p>
-          </section>
+          <details class="panel next-action-panel collapsible-panel" open>
+            <summary class="panel-header"><h2>Next Best Action</h2><span>Coach priority</span></summary>
+            <div id="nextActionCard" class="next-action-card">
+              <strong id="nextActionTitle">Follow the plan</strong>
+              <p id="nextActionText">No action required yet.</p>
+            </div>
+          </details>
 
-          <section class="panel session-status-panel">
-            <div class="panel-header">
+          <details class="panel session-status-panel collapsible-panel">
+            <summary class="panel-header">
               <h2>Session Status</h2>
               <span>Review</span>
-            </div>
+            </summary>
             <div class="session-status-grid">
               <article><span>Session Time</span><strong>03:12:45</strong></article>
               <article><span>Trades Left</span><strong>5 of 12</strong></article>
               <article><span>Next Review</span><strong>Post-Market</strong></article>
             </div>
-          </section>
+          </details>
 
-          <details class="panel backend-drawer">
-            <summary>Backend, Reviews & Logs</summary>
+          <details class="panel backend-drawer collapsible-panel">
+            <summary class="panel-header"><h2>Backend, Reviews & Logs</h2><span>Advanced</span></summary>
             <div class="api-connection-panel">
               <div class="panel-header">
                 <h3>API Connections</h3>
@@ -453,6 +455,6 @@
       apiBaseUrl: ''
     };
   </script>
-  <script src="app.js?v=mockup-1"></script>
+  <script src="app.js?v=mockup-2"></script>
 </body>
 </html>
