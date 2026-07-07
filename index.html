@@ -285,7 +285,7 @@
         <div class="api-connection-panel">
           <div class="panel-header">
             <h3>API Connections</h3>
-            <span id="apiServerStatus">Checking local server</span>
+            <span id="apiServerStatus">Checking backend</span>
           </div>
           <ul class="status-list">
             <li><span>OpenAI voice</span><strong id="openAiApiStatus">Unknown</strong></li>
@@ -297,7 +297,7 @@
             <button id="connectProjectX" type="button">Connect ProjectX</button>
             <button id="syncProjectXReadOnly" type="button">Sync ProjectX Read-Only</button>
           </div>
-          <p id="apiConnectionMessage" class="api-message">Run the local server to use real API connections.</p>
+          <p id="apiConnectionMessage" class="api-message">Connect a backend to use real API connections.</p>
         </div>
         <div class="button-grid">
           <button id="startSession">Start Session</button>
@@ -334,7 +334,12 @@
     </main>
   </div>
 
-  <script src="app.js?v=flash-ui-1"></script>
+  <script>
+    window.TRADING_COACH_CONFIG = {
+      apiBaseUrl: ''
+    };
+  </script>
+  <script src="app.js?v=backend-1"></script>
 </body>
 </html>
 

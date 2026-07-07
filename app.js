@@ -22,6 +22,8 @@ const COACH_CHECK_IN_STEPS = [
   'What is the next disciplined action?'
 ];
 
+const API_BASE_URL = resolveApiBaseUrl();
+
 const state = {
   isLive: false,
   activeAdapterName: 'SimulatorAdapter',
@@ -44,6 +46,7 @@ const state = {
   weeklyReview: null,
   endDayReview: null,
   api: {
+    baseUrl: API_BASE_URL,
     serverOnline: false,
     openAiConfigured: false,
     projectXConfigured: false,
@@ -471,6 +474,39 @@ function money(value) {
 
 function nowLabel() {
   return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+}
+
+function resolveApiBaseUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const queryApiBase = params.get('apiBase');
+
+  if (queryApiBase === 'local') {
+    localStorage.removeItem('tradingCoachApiBaseUrl');
+    return '';
+  }
+
+  if (queryApiBase) {
+    const normalizedQueryUrl = normalizeApiBaseUrl(queryApiBase);
+    localStorage.setItem('tradingCoachApiBaseUrl', normalizedQueryUrl);
+    return normalizedQueryUrl;
+  }
+
+  const configuredUrl = window.TRADING_COACH_CONFIG?.apiBaseUrl || '';
+  const storedUrl = localStorage.getItem('tradingCoachApiBaseUrl') || '';
+
+  return normalizeApiBaseUrl(configuredUrl || storedUrl);
+}
+
+function normalizeApiBaseUrl(value) {
+  return String(value || '').trim().replace(/\/$/, '');
+}
+
+function apiUrl(pathname) {
+  if (/^https?:\/\//i.test(pathname)) {
+    return pathname;
+  }
+
+  return `${API_BASE_URL}${pathname}`;
 }
 
 function isWeeklyCheckInOpen(date = new Date()) {
@@ -939,13 +975,13 @@ async function refreshApiStatus() {
     state.auth.required = Boolean(status.auth?.required);
     state.auth.user = status.auth?.user || state.auth.user;
 
-    setApiMessage('Local API bridge is available. Configure keys in .env to enable real connections.', 'info');
+    setApiMessage(`${state.api.baseUrl || 'Same-origin'} backend is available. Configure server environment variables to enable real connections.`, 'info');
   } catch (error) {
     state.api.serverOnline = false;
     state.api.openAiConfigured = false;
     state.api.projectXConfigured = false;
     state.api.projectXConnected = false;
-    setApiMessage('Local API bridge is not running. Start the app with node server.js.', 'warning');
+    setApiMessage('Backend API is not reachable. Static simulator mode still works.', 'warning');
   }
 
   renderApiConnections();
@@ -1217,7 +1253,7 @@ async function fetchJson(url, options = {}, authOptions = {}) {
   }
 
   requestOptions.headers = headers;
-  const response = await fetch(url, requestOptions);
+  const response = await fetch(apiUrl(url), requestOptions);
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok || data.ok === false) {
@@ -1933,8 +1969,8 @@ function renderApiConnections() {
     : state.api.serverOnline
       ? state.auth.configured
         ? 'Signed in'
-        : 'Local server online'
-      : 'Local server offline';
+        : 'Backend online'
+      : 'Backend offline';
   elements.apiServerStatus.className = state.api.serverOnline ? 'status-ok' : 'status-danger';
   elements.openAiApiStatus.textContent = state.api.openAiConfigured
     ? state.api.voiceConnected

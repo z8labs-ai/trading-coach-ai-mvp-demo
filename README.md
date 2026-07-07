@@ -79,6 +79,9 @@ When the frontend is published as a static public demo, it runs in simulator-onl
 The local backend:
 
 - Serves the frontend from `http://localhost:4173`.
+- Can run as a deployable Node backend when a host provides `PORT`.
+- Supports a CORS allowlist through `ALLOWED_ORIGINS`.
+- Exposes `/api/health` for deployment health checks.
 - Reads local environment variables from `.env`.
 - Creates short-lived OpenAI Realtime client secrets for browser voice sessions.
 - Connects to ProjectX / TopstepX read-only endpoints when credentials are configured.
@@ -92,6 +95,10 @@ To configure it:
 
 Important local variables:
 
+- `PORT`
+- `HOST`
+- `NODE_ENV`
+- `ALLOWED_ORIGINS`
 - `CLERK_PUBLISHABLE_KEY`
 - `CLERK_SECRET_KEY`
 - `CLERK_JWT_KEY`
@@ -105,6 +112,40 @@ Important local variables:
 - `PROJECTX_ACCOUNT_ID`
 
 The ProjectX integration is intentionally read-only. It can authenticate, fetch accounts, fetch positions, fetch orders, and fetch trades. It does not place, modify, cancel, close, flatten, or block trades.
+
+## Deployed backend mode
+
+The same `server.js` can be deployed to a Node host such as Render, Railway, Fly.io, or a VPS.
+
+Start command:
+
+```text
+npm start
+```
+
+The start command runs `node server.js`. The project still has no runtime package dependencies.
+
+Required production rules:
+
+1. Put real keys only in the host's environment variable settings.
+2. Set `ALLOWED_ORIGINS` to the exact frontend origins allowed to call the backend.
+3. Use HTTPS for the deployed backend.
+4. Keep ProjectX read-only until the product is ready for stricter controls.
+5. Do not expose `.env`, broker credentials, or OpenAI keys to the browser.
+
+Frontend backend selection:
+
+- Same-origin/local mode uses `/api/...` automatically.
+- A static public frontend can point to a deployed backend with `?apiBase=https://your-backend.example.com`.
+- Passing `?apiBase=local` clears the saved backend URL and returns to same-origin mode.
+
+Backend health check:
+
+```text
+GET /api/health
+```
+
+Expected response includes service name, environment, timestamp, and whether auth/OpenAI/ProjectX are configured.
 
 ## Adapter flow
 
