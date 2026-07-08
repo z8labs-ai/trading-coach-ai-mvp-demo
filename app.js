@@ -16,6 +16,16 @@ const RISK_TIERS = {
 
 const RISK_TIER_ORDER = ['low', 'moderate', 'aggressive', 'highAggressive'];
 
+const DEFAULT_DASHBOARD_WIDGETS = [
+  'account',
+  'risk',
+  'performance',
+  'coach-status',
+  'behavior',
+  'trade-ticket',
+  'next-action'
+];
+
 const COACH_CHECK_IN_STEPS = [
   'What happened on the last trade?',
   'Was that trade inside your plan?',
@@ -36,8 +46,9 @@ const state = {
     clerk: null
   },
   ui: {
-    focus: 'overview',
-    logFilter: 'all'
+    focus: 'dashboard',
+    logFilter: 'all',
+    dashboardWidgets: loadDashboardWidgets()
   },
   disciplineLock: {
     isLocked: false,
@@ -92,6 +103,9 @@ const elements = {
   coachStateBadge: document.getElementById('coachStateBadge'),
   coachStateText: document.getElementById('coachStateText'),
   focusTabs: document.querySelectorAll('.focus-tabs button'),
+  workspaceColumns: document.querySelectorAll('.mock-column'),
+  dashboardPanels: document.querySelectorAll('[data-pages]'),
+  dashboardWidgetToggles: document.querySelectorAll('[data-dashboard-widget-toggle]'),
   planForm: document.getElementById('planForm'),
   accountCapital: document.getElementById('accountCapital'),
   riskTier: document.getElementById('riskTier'),
@@ -529,6 +543,24 @@ function resolveApiBaseUrl() {
 
 function normalizeApiBaseUrl(value) {
   return String(value || '').trim().replace(/\/$/, '');
+}
+
+function loadDashboardWidgets() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('tradingCoachDashboardWidgets') || 'null');
+
+    if (Array.isArray(saved) && saved.length > 0) {
+      return saved;
+    }
+  } catch {
+    return [...DEFAULT_DASHBOARD_WIDGETS];
+  }
+
+  return [...DEFAULT_DASHBOARD_WIDGETS];
+}
+
+function saveDashboardWidgets() {
+  localStorage.setItem('tradingCoachDashboardWidgets', JSON.stringify(state.ui.dashboardWidgets));
 }
 
 function apiUrl(pathname) {
@@ -2007,6 +2039,7 @@ function render() {
   elements.interventionName.textContent = intervention.name;
   elements.interventionAction.textContent = intervention.action;
   elements.interventionStatus.className = `intervention-status ${intervention.className}`;
+  renderWorkspacePage();
   renderCommandStrip(intervention);
   renderFocusTabs();
   renderRiskCockpit();
@@ -2034,6 +2067,47 @@ function renderFocusTabs() {
   elements.focusTabs.forEach((button) => {
     button.classList.toggle('active', button.dataset.focus === state.ui.focus);
   });
+}
+
+function renderWorkspacePage() {
+  const activePage = state.ui.focus;
+  const selectedWidgets = new Set(state.ui.dashboardWidgets);
+
+  elements.appShell.dataset.focus = activePage;
+  elements.dashboardPanels.forEach((panel) => {
+    const pageList = (panel.dataset.pages || '').split(/\s+/).filter(Boolean);
+    const widget = panel.dataset.dashboardWidget;
+    const showOnPage = pageList.includes(activePage);
+    const showOnDashboard = activePage === 'dashboard'
+      && (!widget || selectedWidgets.has(widget));
+
+    panel.hidden = activePage === 'dashboard'
+      ? !showOnPage || !showOnDashboard
+      : !showOnPage;
+  });
+
+  elements.dashboardWidgetToggles.forEach((toggle) => {
+    toggle.checked = selectedWidgets.has(toggle.dataset.dashboardWidgetToggle);
+  });
+
+  elements.workspaceColumns.forEach((column) => {
+    const hasVisiblePanel = Array.from(column.querySelectorAll('.panel')).some((panel) => !panel.hidden);
+    column.hidden = !hasVisiblePanel;
+  });
+}
+
+function toggleDashboardWidget(widget, enabled) {
+  const widgets = new Set(state.ui.dashboardWidgets);
+
+  if (enabled) {
+    widgets.add(widget);
+  } else {
+    widgets.delete(widget);
+  }
+
+  state.ui.dashboardWidgets = Array.from(widgets);
+  saveDashboardWidgets();
+  render();
 }
 
 function renderRiskCockpit() {
@@ -2606,8 +2680,13 @@ elements.coachCheckInInput.addEventListener('keydown', (event) => {
 });
 elements.focusTabs.forEach((button) => {
   button.addEventListener('click', () => {
-    state.ui.focus = button.dataset.focus || 'overview';
+    state.ui.focus = button.dataset.focus || 'dashboard';
     render();
+  });
+});
+elements.dashboardWidgetToggles.forEach((toggle) => {
+  toggle.addEventListener('change', () => {
+    toggleDashboardWidget(toggle.dataset.dashboardWidgetToggle, toggle.checked);
   });
 });
 elements.logFilters.forEach((button) => {

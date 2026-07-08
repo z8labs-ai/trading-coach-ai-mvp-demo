@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trading Coach AI MVP</title>
-  <link rel="stylesheet" href="styles.css?v=guarded-v1">
+  <link rel="stylesheet" href="styles.css?v=workspace-pages-v1">
 </head>
 <body>
   <div id="authGate" class="auth-gate">
@@ -27,11 +27,15 @@
         <strong>AI</strong>
         <span>Trading Coach</span>
       </div>
-      <nav class="focus-tabs side-nav" aria-label="Dashboard focus">
-        <button id="focusOverview" type="button" class="active" data-focus="overview">Dashboard</button>
-        <button id="focusRisk" type="button" data-focus="risk">Pre-Market Plan</button>
-        <button id="focusCoach" type="button" data-focus="coach">Live Monitoring</button>
-        <button id="focusLogs" type="button" data-focus="logs">Journal & Review</button>
+      <nav class="focus-tabs side-nav" aria-label="Workspace pages">
+        <button id="focusDashboard" type="button" class="active" data-focus="dashboard">Dashboard</button>
+        <button id="focusTradeDesk" type="button" data-focus="trade-desk">Trade Desk</button>
+        <button id="focusPremarket" type="button" data-focus="premarket">Pre-Market Plan</button>
+        <button id="focusMonitoring" type="button" data-focus="monitoring">Risk Monitor</button>
+        <button id="focusCoach" type="button" data-focus="coach">AI Coach</button>
+        <button id="focusInterventions" type="button" data-focus="interventions">Interventions</button>
+        <button id="focusJournal" type="button" data-focus="journal">Journal & Review</button>
+        <button id="focusConnections" type="button" data-focus="connections">Connections</button>
       </nav>
     </aside>
 
@@ -79,7 +83,27 @@
 
       <main class="layout mockup-layout">
         <section class="mock-column mock-left">
-          <details class="panel account-panel collapsible-panel" open>
+          <details class="panel dashboard-customizer-panel collapsible-panel" data-pages="dashboard" open>
+            <summary class="panel-header">
+              <h2>Dashboard Customizer</h2>
+              <span>Choose widgets</span>
+            </summary>
+            <div class="dashboard-widget-grid">
+              <label class="checkbox-row"><input type="checkbox" data-dashboard-widget-toggle="account"> Account overview</label>
+              <label class="checkbox-row"><input type="checkbox" data-dashboard-widget-toggle="risk"> Risk status</label>
+              <label class="checkbox-row"><input type="checkbox" data-dashboard-widget-toggle="performance"> Live performance</label>
+              <label class="checkbox-row"><input type="checkbox" data-dashboard-widget-toggle="plan-summary"> Plan summary</label>
+              <label class="checkbox-row"><input type="checkbox" data-dashboard-widget-toggle="coach-status"> Coach status</label>
+              <label class="checkbox-row"><input type="checkbox" data-dashboard-widget-toggle="behavior"> Behavior monitor</label>
+              <label class="checkbox-row"><input type="checkbox" data-dashboard-widget-toggle="rules"> Active rules</label>
+              <label class="checkbox-row"><input type="checkbox" data-dashboard-widget-toggle="coach-conversation"> Coach conversation</label>
+              <label class="checkbox-row"><input type="checkbox" data-dashboard-widget-toggle="trade-ticket"> Trade ticket</label>
+              <label class="checkbox-row"><input type="checkbox" data-dashboard-widget-toggle="next-action"> Next action</label>
+              <label class="checkbox-row"><input type="checkbox" data-dashboard-widget-toggle="session-status"> Session status</label>
+            </div>
+          </details>
+
+          <details class="panel account-panel collapsible-panel" data-pages="dashboard trade-desk" data-dashboard-widget="account" open>
             <summary class="panel-header">
               <h2>Account Overview</h2>
               <span>Live session</span>
@@ -112,7 +136,7 @@
             </div>
           </details>
 
-          <details class="panel dashboard-panel collapsible-panel" open>
+          <details class="panel dashboard-panel collapsible-panel" data-pages="dashboard monitoring" data-dashboard-widget="risk" open>
             <summary class="panel-header">
               <h2>Risk Status</h2>
               <span id="riskLevel">Low</span>
@@ -143,7 +167,7 @@
             </div>
           </details>
 
-          <details class="panel chart-panel collapsible-panel">
+          <details class="panel chart-panel collapsible-panel" data-pages="dashboard monitoring journal" data-dashboard-widget="performance">
             <summary class="panel-header">
               <h2>Live Performance Chart</h2>
               <span>Demo visual</span>
@@ -167,7 +191,7 @@
             </div>
           </details>
 
-          <details class="panel plan-summary-card collapsible-panel">
+          <details class="panel plan-summary-card collapsible-panel" data-pages="dashboard premarket" data-dashboard-widget="plan-summary">
             <summary class="panel-header">
               <h2>Today's Plan Summary</h2>
               <span>Guardrails</span>
@@ -192,7 +216,7 @@
         </section>
 
         <section class="mock-column mock-middle">
-          <details class="panel coach-status-panel collapsible-panel" open>
+          <details class="panel coach-status-panel collapsible-panel" data-pages="dashboard monitoring coach" data-dashboard-widget="coach-status" open>
             <summary class="panel-header">
               <h2>AI Coach Status</h2>
               <span id="escalationLevel">Level 0</span>
@@ -214,7 +238,7 @@
             </ul>
           </details>
 
-          <details class="panel behavior-panel collapsible-panel">
+          <details class="panel behavior-panel collapsible-panel" data-pages="dashboard monitoring" data-dashboard-widget="behavior">
             <summary class="panel-header">
               <h2>Behavior Monitor</h2>
               <span>Real time</span>
@@ -230,7 +254,7 @@
             </div>
           </details>
 
-          <details class="panel active-rules-card collapsible-panel">
+          <details class="panel active-rules-card collapsible-panel" data-pages="dashboard monitoring premarket" data-dashboard-widget="rules">
             <summary class="panel-header">
               <h2>Active Rules</h2>
               <span>Required</span>
@@ -244,7 +268,7 @@
             </div>
           </details>
 
-          <details class="panel plan-panel collapsible-panel">
+          <details class="panel plan-panel collapsible-panel" data-pages="premarket">
             <summary class="panel-header"><h2>Pre-Market Plan Setup</h2><span>Weekly risk</span></summary>
             <form id="planForm" class="plan-form">
               <div class="form-grid">
@@ -325,7 +349,7 @@
         </section>
 
         <section class="mock-column mock-right">
-          <details class="panel coach-panel collapsible-panel" open>
+          <details class="panel coach-panel collapsible-panel" data-pages="dashboard trade-desk coach" data-dashboard-widget="coach-conversation" open>
             <summary class="panel-header">
               <h2>AI Coach Conversation</h2>
               <span>Voice</span>
@@ -337,7 +361,7 @@
             </div>
           </details>
 
-          <details class="panel reflection-gate collapsible-panel" id="reflectionGate">
+          <details class="panel reflection-gate collapsible-panel" id="reflectionGate" data-pages="coach interventions">
             <summary class="panel-header">
               <h3>Coach Check-In Gate</h3>
               <span id="reflectionStatus">No check-in required.</span>
@@ -351,7 +375,7 @@
             <ul id="reflectionHistory" class="reflection-history"></ul>
           </details>
 
-          <details class="panel trade-ticket-panel collapsible-panel" open>
+          <details class="panel trade-ticket-panel collapsible-panel" data-pages="dashboard trade-desk" data-dashboard-widget="trade-ticket" open>
             <summary class="panel-header">
               <h2>Guarded Trade Ticket</h2>
               <span id="executionModeStatus">Simulated</span>
@@ -412,7 +436,7 @@
             <ul id="tradeTicketReasons" class="status-list ticket-reasons"></ul>
           </details>
 
-          <details class="panel controls-panel collapsible-panel">
+          <details class="panel controls-panel collapsible-panel" data-pages="trade-desk interventions">
             <summary class="panel-header">
               <h2>Intervention Controls</h2>
               <span>Demo triggers</span>
@@ -429,7 +453,7 @@
             <button id="syncProjectXMock" type="button" class="wide-demo-button">Sync Mock ProjectX Data</button>
           </details>
 
-          <details class="panel emergency-panel collapsible-panel">
+          <details class="panel emergency-panel collapsible-panel" data-pages="trade-desk interventions">
             <summary class="panel-header">
               <h2>Emergency Protection</h2>
               <span id="emergencyModeStatus">Attempt only</span>
@@ -446,7 +470,7 @@
             <div id="emergencyActionStatus" class="ticket-status">No emergency action attempted.</div>
           </details>
 
-          <details class="panel next-action-panel collapsible-panel" open>
+          <details class="panel next-action-panel collapsible-panel" data-pages="dashboard trade-desk monitoring" data-dashboard-widget="next-action" open>
             <summary class="panel-header"><h2>Next Best Action</h2><span>Coach priority</span></summary>
             <div id="nextActionCard" class="next-action-card">
               <strong id="nextActionTitle">Follow the plan</strong>
@@ -454,7 +478,7 @@
             </div>
           </details>
 
-          <details class="panel session-status-panel collapsible-panel">
+          <details class="panel session-status-panel collapsible-panel" data-pages="dashboard monitoring journal" data-dashboard-widget="session-status">
             <summary class="panel-header">
               <h2>Session Status</h2>
               <span>Review</span>
@@ -466,7 +490,7 @@
             </div>
           </details>
 
-          <details class="panel backend-drawer collapsible-panel">
+          <details class="panel backend-drawer collapsible-panel" data-pages="journal connections">
             <summary class="panel-header"><h2>Backend, Reviews & Logs</h2><span>Advanced</span></summary>
             <div class="api-connection-panel">
               <div class="panel-header">
@@ -534,6 +558,6 @@
       apiBaseUrl: ''
     };
   </script>
-  <script src="app.js?v=guarded-v1"></script>
+  <script src="app.js?v=workspace-pages-v1"></script>
 </body>
 </html>

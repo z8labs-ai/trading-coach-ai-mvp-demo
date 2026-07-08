@@ -38,6 +38,8 @@ The goal is to prove the core product loop:
 - Prioritizes the live cockpit first, with plan setup, demo tools, reviews, and logs separated into lower-priority areas.
 - Uses a mock-up-inspired trading terminal layout with side navigation, account overview, risk cockpit, coach status, chat, controls, and review/log drawers.
 - Uses collapsible dashboard sections so traders can open only the areas they need during a session.
+- Uses workspace pages for Dashboard, Trade Desk, Pre-Market Plan, Risk Monitor, AI Coach, Interventions, Journal & Review, and Connections.
+- Lets the trader customize the Dashboard by choosing which widgets are visible.
 - Shows a live dashboard inspired by the product vision.
 
 ## What this prototype does not do yet

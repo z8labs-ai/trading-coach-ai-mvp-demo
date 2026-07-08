@@ -19,6 +19,10 @@
   box-sizing: border-box;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 body {
   margin: 0;
   min-height: 100vh;
@@ -1339,10 +1343,12 @@ textarea:disabled {
   padding: 0;
   border: 0;
   background: transparent;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
 }
 
 .side-nav button {
-  min-height: 66px;
+  min-height: 54px;
   padding: 8px;
   border: 1px solid transparent;
   background: transparent;
@@ -1357,6 +1363,51 @@ textarea:disabled {
   border-color: rgba(54, 197, 255, 0.24);
   background: rgba(54, 197, 255, 0.1);
   box-shadow: inset 0 0 18px rgba(54, 197, 255, 0.08);
+}
+
+.dashboard-customizer-panel {
+  border-color: rgba(54, 197, 255, 0.42);
+}
+
+.dashboard-widget-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.dashboard-widget-grid .checkbox-row {
+  min-height: 44px;
+  margin: 0;
+  border: 1px solid rgba(36, 70, 92, 0.55);
+  border-radius: 6px;
+  padding: 9px 10px;
+  background: rgba(8, 20, 29, 0.55);
+  color: #dcecf4;
+}
+
+.app-shell[data-focus="dashboard"] .dashboard-customizer-panel,
+.app-shell[data-focus="trade-desk"] .trade-ticket-panel,
+.app-shell[data-focus="premarket"] .plan-panel,
+.app-shell[data-focus="monitoring"] .dashboard-panel,
+.app-shell[data-focus="coach"] .coach-panel,
+.app-shell[data-focus="interventions"] .emergency-panel,
+.app-shell[data-focus="journal"] .backend-drawer,
+.app-shell[data-focus="connections"] .backend-drawer {
+  border-color: rgba(54, 197, 255, 0.72);
+  box-shadow: 0 0 34px rgba(54, 197, 255, 0.1);
+}
+
+.app-shell[data-focus="trade-desk"] .mockup-layout,
+.app-shell[data-focus="coach"] .mockup-layout,
+.app-shell[data-focus="interventions"] .mockup-layout,
+.app-shell[data-focus="journal"] .mockup-layout,
+.app-shell[data-focus="connections"] .mockup-layout {
+  grid-template-columns: minmax(360px, 0.9fr) minmax(420px, 1.1fr);
+}
+
+.app-shell[data-focus="premarket"] .mockup-layout,
+.app-shell[data-focus="monitoring"] .mockup-layout {
+  grid-template-columns: minmax(360px, 1fr) minmax(360px, 1fr);
 }
 
 .terminal-shell {
@@ -1749,7 +1800,9 @@ textarea:disabled {
   }
 
   .side-nav {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+    max-height: none;
+    overflow-y: visible;
   }
 
   .side-nav button {
