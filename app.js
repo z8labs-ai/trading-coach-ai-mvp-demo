@@ -51,7 +51,13 @@ const state = {
     openAiConfigured: false,
     projectXConfigured: false,
     projectXConnected: false,
+    projectXExecutionEnabled: false,
     voiceConnected: false
+  },
+  execution: {
+    mode: 'simulated',
+    lastPreview: null,
+    lastAction: null
   },
   plan: {
     accountCapital: 50000,
@@ -151,6 +157,7 @@ const elements = {
   apiServerStatus: document.getElementById('apiServerStatus'),
   openAiApiStatus: document.getElementById('openAiApiStatus'),
   projectXApiStatus: document.getElementById('projectXApiStatus'),
+  projectXExecutionStatus: document.getElementById('projectXExecutionStatus'),
   refreshApiStatus: document.getElementById('refreshApiStatus'),
   toggleVoiceCoach: document.getElementById('toggleVoiceCoach'),
   connectProjectX: document.getElementById('connectProjectX'),
@@ -164,7 +171,27 @@ const elements = {
   plannedLoss: document.getElementById('plannedLoss'),
   oversizeTrade: document.getElementById('oversizeTrade'),
   revengeTrade: document.getElementById('revengeTrade'),
-  resetSession: document.getElementById('resetSession')
+  resetSession: document.getElementById('resetSession'),
+  executionModeStatus: document.getElementById('executionModeStatus'),
+  tradeTicketForm: document.getElementById('tradeTicketForm'),
+  ticketAccountId: document.getElementById('ticketAccountId'),
+  ticketContractId: document.getElementById('ticketContractId'),
+  ticketSide: document.getElementById('ticketSide'),
+  ticketOrderType: document.getElementById('ticketOrderType'),
+  ticketSize: document.getElementById('ticketSize'),
+  ticketEstimatedRisk: document.getElementById('ticketEstimatedRisk'),
+  ticketStopLossPrice: document.getElementById('ticketStopLossPrice'),
+  ticketLimitPrice: document.getElementById('ticketLimitPrice'),
+  ticketSetup: document.getElementById('ticketSetup'),
+  previewOrder: document.getElementById('previewOrder'),
+  submitGuardedOrder: document.getElementById('submitGuardedOrder'),
+  tradeTicketStatus: document.getElementById('tradeTicketStatus'),
+  tradeTicketReasons: document.getElementById('tradeTicketReasons'),
+  emergencyModeStatus: document.getElementById('emergencyModeStatus'),
+  emergencyConfirm: document.getElementById('emergencyConfirm'),
+  cancelOpenOrders: document.getElementById('cancelOpenOrders'),
+  flattenPositions: document.getElementById('flattenPositions'),
+  emergencyActionStatus: document.getElementById('emergencyActionStatus')
 };
 
 const voiceCoach = {
@@ -450,6 +477,8 @@ function defaultSession() {
     riskLevel: 'Low',
     riskSummary: 'You are within your plan.',
     events: [],
+    orderEvents: [],
+    riskActions: [],
     eventLog: [],
     reflectionRequired: false,
     coachCheckIn: defaultCoachCheckIn(),
@@ -972,6 +1001,8 @@ async function refreshApiStatus() {
     state.api.openAiConfigured = Boolean(status.openai?.configured);
     state.api.projectXConfigured = Boolean(status.projectx?.configured);
     state.api.projectXConnected = Boolean(status.projectx?.connected);
+    state.api.projectXExecutionEnabled = Boolean(status.projectx?.executionEnabled);
+    state.execution.mode = state.api.projectXExecutionEnabled ? 'real_armed' : 'simulated';
     state.auth.configured = Boolean(status.auth?.configured);
     state.auth.required = Boolean(status.auth?.required);
     state.auth.user = status.auth?.user || state.auth.user;
@@ -982,10 +1013,13 @@ async function refreshApiStatus() {
     state.api.openAiConfigured = false;
     state.api.projectXConfigured = false;
     state.api.projectXConnected = false;
+    state.api.projectXExecutionEnabled = false;
+    state.execution.mode = 'simulated';
     setApiMessage('Backend API is not reachable. Static simulator mode still works.', 'warning');
   }
 
   renderApiConnections();
+  renderExecutionSafety();
 }
 
 async function toggleVoiceCoach() {
@@ -1454,6 +1488,186 @@ function normalizeTradingEvent(rawEvent, context) {
   };
 }
 
+function normalizeOrderIntent(rawIntent, context) {
+  const totalEstimatedRisk = rawIntent.size * rawIntent.estimatedRisk;
+
+  return {
+    type: 'order_intent',
+    source: 'trade_ticket',
+    adapterName: 'GuardedTradeTicket',
+    timestamp: new Date(),
+    accountId: rawIntent.accountId,
+    contractId: rawIntent.contractId,
+    side: rawIntent.side,
+    orderType: rawIntent.orderType,
+    positionSize: rawIntent.size,
+    estimatedRisk: rawIntent.estimatedRisk,
+    totalEstimatedRisk,
+    stopLossPrice: rawIntent.stopLossPrice,
+    limitPrice: rawIntent.limitPrice,
+    setup: rawIntent.setup,
+    isApprovedSetup: context.plan.approvedSetups.includes(rawIntent.setup)
+  };
+}
+
+function readOrderIntentFromTicket() {
+  return normalizeOrderIntent({
+    accountId: elements.ticketAccountId.value.trim(),
+    contractId: elements.ticketContractId.value.trim(),
+    side: elements.ticketSide.value,
+    orderType: elements.ticketOrderType.value,
+    size: Math.max(0, Number(elements.ticketSize.value) || 0),
+    estimatedRisk: Math.max(0, Number(elements.ticketEstimatedRisk.value) || 0),
+    stopLossPrice: elements.ticketStopLossPrice.value ? Number(elements.ticketStopLossPrice.value) : null,
+    limitPrice: elements.ticketLimitPrice.value ? Number(elements.ticketLimitPrice.value) : null,
+    setup: elements.ticketSetup.value.trim()
+  }, state);
+}
+
+function evaluatePreTradeRiskGate(intent, context) {
+  const reasons = [];
+  const warnings = [];
+  const session = context.session;
+  const plan = context.plan;
+  const dailyLoss = Math.abs(Math.min(session.dailyPnl, 0));
+  const remainingDailyRisk = Math.max(0, plan.maxDailyLoss - dailyLoss);
+
+  if (!context.isLive) {
+    warnings.push('Session is idle. Start the session before treating this as live monitoring.');
+  }
+
+  if (!intent.accountId) {
+    reasons.push('Account is required.');
+  }
+
+  if (!intent.contractId) {
+    reasons.push('Contract is required.');
+  }
+
+  if (!intent.setup) {
+    reasons.push('Setup tag is required.');
+  } else if (!intent.isApprovedSetup) {
+    reasons.push(`"${intent.setup}" is not in today\'s approved setups.`);
+  }
+
+  if (intent.positionSize < 1) {
+    reasons.push('Contracts must be at least 1.');
+  }
+
+  if (intent.positionSize > plan.maxContracts) {
+    reasons.push(`Order size is ${intent.positionSize}, above the plan max of ${plan.maxContracts}.`);
+  }
+
+  if (session.tradeCount >= plan.maxTrades) {
+    reasons.push(`Daily trade limit reached: ${session.tradeCount} of ${plan.maxTrades}.`);
+  }
+
+  if (dailyLoss >= plan.maxDailyLoss) {
+    reasons.push(`Daily loss limit is already breached at ${money(-dailyLoss)}.`);
+  }
+
+  if (intent.estimatedRisk <= 0) {
+    reasons.push('Estimated risk per contract is required.');
+  }
+
+  if (!intent.stopLossPrice || Number.isNaN(intent.stopLossPrice)) {
+    reasons.push('Stop loss price is required before submit.');
+  }
+
+  if (intent.totalEstimatedRisk > remainingDailyRisk) {
+    reasons.push(`Estimated order risk ${money(intent.totalEstimatedRisk)} is above remaining daily risk ${money(remainingDailyRisk)}.`);
+  }
+
+  if (session.reflectionRequired) {
+    reasons.push('Coach check-in is active. Complete the conversation before new orders.');
+  }
+
+  if (session.escalationLevel >= 5) {
+    reasons.push('Lockout is recommended. New orders are blocked in this session.');
+  } else if (session.escalationLevel >= 4) {
+    reasons.push('Cooldown is active. New order intents are blocked until reset or check-in clears the state.');
+  }
+
+  return {
+    approved: reasons.length === 0,
+    reasons,
+    warnings,
+    remainingDailyRisk
+  };
+}
+
+function recordOrderEvent(type, intent, decision) {
+  const label = type.replaceAll('_', ' ');
+  const reasonText = decision?.reasons?.length ? ` Reason: ${decision.reasons[0]}` : '';
+  const event = {
+    type,
+    time: nowLabel(),
+    timestamp: new Date(),
+    intent,
+    decision: decision || null
+  };
+
+  state.session.orderEvents.unshift(event);
+  state.session.orderEvents = state.session.orderEvents.slice(0, 20);
+  recordEventLog('Order Gate', `${label}: ${intent.side} ${intent.positionSize} ${intent.contractId}.${reasonText}`);
+  return event;
+}
+
+function previewGuardedOrder() {
+  const intent = readOrderIntentFromTicket();
+  const decision = evaluatePreTradeRiskGate(intent, state);
+
+  state.execution.lastPreview = { intent, decision };
+  recordOrderEvent(decision.approved ? 'order_approved' : 'order_rejected', intent, decision);
+
+  if (decision.approved) {
+    addCoachMessage('Order approved by risk gate', `This ${intent.side} order fits the current risk budget. Estimated risk: ${money(intent.totalEstimatedRisk)}.`, 'info');
+  } else {
+    addCoachMessage('Order blocked before broker', decision.reasons[0], 'danger');
+  }
+
+  render();
+}
+
+async function submitGuardedOrder() {
+  const intent = readOrderIntentFromTicket();
+  const decision = evaluatePreTradeRiskGate(intent, state);
+
+  state.execution.lastPreview = { intent, decision };
+
+  if (!decision.approved) {
+    recordOrderEvent('order_rejected', intent, decision);
+    addCoachMessage('Order blocked before broker', decision.reasons[0], 'danger');
+    render();
+    return;
+  }
+
+  recordOrderEvent('order_approved', intent, decision);
+
+  if (!state.api.projectXExecutionEnabled) {
+    recordOrderEvent('order_submitted', intent, { reasons: ['Simulated submission only. Real execution is disabled.'] });
+    addCoachMessage('Simulated order submitted', 'The guarded ticket passed risk checks, but no broker call was made because real execution is disabled.', 'info');
+    state.execution.lastAction = { type: 'order_submitted', simulated: true, intent };
+    render();
+    return;
+  }
+
+  try {
+    const result = await fetchJson('/api/projectx/order/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(intent)
+    });
+    recordOrderEvent('order_submitted', intent, { reasons: ['ProjectX submit route accepted the request.'] });
+    addCoachMessage('Order submitted', result.message || 'ProjectX submit route returned a success response.', 'info');
+  } catch (error) {
+    recordOrderEvent('risk_action_failed', intent, { reasons: [error.message] });
+    addCoachMessage('Order submit failed safely', error.message, 'danger');
+  }
+
+  render();
+}
+
 function processTradingEvent(event) {
   applyTradeEventToSession(event, state);
   const riskEvents = RulesEngine.evaluate(event, state);
@@ -1704,6 +1918,68 @@ function recordEventLog(stage, detail) {
   state.session.eventLog = state.session.eventLog.slice(0, 12);
 }
 
+function recordRiskAction(type, detail) {
+  const action = {
+    type,
+    time: nowLabel(),
+    timestamp: new Date(),
+    detail
+  };
+
+  state.session.riskActions.unshift(action);
+  state.session.riskActions = state.session.riskActions.slice(0, 20);
+  recordEventLog('Risk Action', `${type.replaceAll('_', ' ')}: ${detail}`);
+  state.execution.lastAction = action;
+  return action;
+}
+
+async function requestEmergencyAction(actionType) {
+  const accountId = elements.ticketAccountId.value.trim();
+  const label = actionType === 'cancel-open' ? 'cancel open orders' : 'flatten positions';
+
+  if (!elements.emergencyConfirm.checked) {
+    elements.emergencyActionStatus.textContent = 'Confirm the protection-action disclaimer first.';
+    elements.emergencyActionStatus.className = 'ticket-status blocked';
+    recordRiskAction('risk_action_failed', `Confirmation missing for ${label}.`);
+    renderEventLog();
+    return;
+  }
+
+  if (!window.confirm(`Attempt to ${label}? This is not a guaranteed broker lockout.`)) {
+    recordRiskAction('risk_action_failed', `Trader cancelled ${label} confirmation.`);
+    render();
+    return;
+  }
+
+  recordRiskAction('risk_action_requested', `Requested ${label} for account ${accountId || 'default account'}.`);
+
+  if (!state.api.projectXExecutionEnabled) {
+    recordRiskAction('risk_action_failed', 'Real execution is disabled, so no ProjectX cancel or flatten call was sent.');
+    addCoachMessage('Emergency action not armed', 'The request was logged, but real execution is disabled on the backend.', 'warning');
+    render();
+    return;
+  }
+
+  try {
+    const endpoint = actionType === 'cancel-open'
+      ? '/api/projectx/orders/cancel-open'
+      : '/api/projectx/positions/flatten';
+    const result = await fetchJson(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ accountId })
+    });
+    const resultType = actionType === 'cancel-open' ? 'orders_cancelled' : 'positions_flattened';
+    recordRiskAction(resultType, result.message || 'ProjectX route returned a success response.');
+    addCoachMessage('Emergency action attempted', 'ProjectX returned a response. Verify the broker platform state before assuming protection completed.', 'warning');
+  } catch (error) {
+    recordRiskAction('risk_action_failed', error.message);
+    addCoachMessage('Emergency action failed safely', error.message, 'danger');
+  }
+
+  render();
+}
+
 function escapeHtml(value) {
   return String(value)
     .replaceAll('&', '&amp;')
@@ -1739,6 +2015,8 @@ function render() {
   renderWeeklyReview();
   renderEndDayReview();
   renderApiConnections();
+  renderTradeTicket();
+  renderExecutionSafety();
 
   elements.riskCard.className = 'risk-card';
   if (state.session.riskLevel === 'Elevated') elements.riskCard.classList.add('warning');
@@ -2005,9 +2283,76 @@ function renderApiConnections() {
     : state.api.projectXConfigured
       ? 'status-warn'
       : 'status-warn';
+  elements.projectXExecutionStatus.textContent = state.api.projectXExecutionEnabled
+    ? 'Real Armed'
+    : 'Disabled';
+  elements.projectXExecutionStatus.className = state.api.projectXExecutionEnabled ? 'status-danger' : 'status-ok';
   elements.toggleVoiceCoach.textContent = state.api.voiceConnected ? 'Stop Voice Coach' : 'Start Voice Coach';
   elements.connectProjectX.disabled = !state.api.serverOnline;
   elements.syncProjectXReadOnly.disabled = !state.api.serverOnline;
+}
+
+function renderTradeTicket() {
+  const preview = state.execution.lastPreview;
+  const setupPlaceholder = state.plan.approvedSetups[0] || 'Opening range breakout';
+
+  if (!elements.ticketSetup.value.trim()) {
+    elements.ticketSetup.value = setupPlaceholder;
+  }
+
+  elements.executionModeStatus.textContent = state.api.projectXExecutionEnabled
+    ? 'Real Execution Armed'
+    : state.api.projectXConnected
+      ? 'Connected Read-Only'
+      : 'Simulated';
+  elements.executionModeStatus.className = state.api.projectXExecutionEnabled ? 'status-danger' : state.api.projectXConnected ? 'status-warn' : 'status-ok';
+  elements.submitGuardedOrder.textContent = state.api.projectXExecutionEnabled ? 'Submit Guarded Order' : 'Submit Simulated Order';
+
+  if (!preview) {
+    elements.tradeTicketStatus.textContent = 'Build an order intent, then preview it before submit.';
+    elements.tradeTicketStatus.className = 'ticket-status';
+    elements.tradeTicketReasons.innerHTML = `
+      <li><span>Risk gate</span><strong>Waiting</strong></li>
+      <li><span>Real execution</span><strong class="${state.api.projectXExecutionEnabled ? 'status-danger' : 'status-ok'}">${state.api.projectXExecutionEnabled ? 'Armed' : 'Disabled'}</strong></li>
+    `;
+    return;
+  }
+
+  const { intent, decision } = preview;
+  const rows = [
+    ['Estimated risk', money(intent.totalEstimatedRisk), decision.approved],
+    ['Remaining daily risk', money(decision.remainingDailyRisk), decision.approved],
+    ['Setup', intent.isApprovedSetup ? 'Approved' : 'Off plan', intent.isApprovedSetup],
+    ['Decision', decision.approved ? 'Approved' : 'Blocked', decision.approved]
+  ];
+  const issues = decision.reasons.concat(decision.warnings || []);
+
+  elements.tradeTicketStatus.textContent = decision.approved
+    ? 'Risk gate approved this order intent. Real broker execution is still controlled by backend safety switches.'
+    : 'Risk gate blocked this order intent before any broker call.';
+  elements.tradeTicketStatus.className = `ticket-status ${decision.approved ? 'approved' : 'blocked'}`;
+  elements.tradeTicketReasons.innerHTML = rows.map(([name, value, ok]) => `
+    <li><span>${escapeHtml(name)}</span><strong class="${ok ? 'status-ok' : 'status-danger'}">${escapeHtml(value)}</strong></li>
+  `).join('') + issues.map((issue) => `
+    <li><span>Reason</span><strong class="status-warn">${escapeHtml(issue)}</strong></li>
+  `).join('');
+}
+
+function renderExecutionSafety() {
+  const armed = state.api.projectXExecutionEnabled;
+  const lastAction = state.execution.lastAction;
+
+  elements.emergencyModeStatus.textContent = armed ? 'Real Armed' : 'Disabled';
+  elements.emergencyModeStatus.className = armed ? 'status-danger' : 'status-ok';
+  elements.cancelOpenOrders.disabled = !armed && !state.api.serverOnline;
+  elements.flattenPositions.disabled = !armed && !state.api.serverOnline;
+
+  if (lastAction && lastAction.type.startsWith('risk_action')) {
+    elements.emergencyActionStatus.textContent = lastAction.detail;
+    elements.emergencyActionStatus.className = lastAction.type === 'risk_action_failed'
+      ? 'ticket-status blocked'
+      : 'ticket-status approved';
+  }
 }
 
 function renderRules() {
@@ -2144,11 +2489,11 @@ function filteredEventLog() {
     const stage = entry.stage.toLowerCase();
 
     if (filter === 'trade') {
-      return stage.includes('simulator') || stage.includes('projectx') || stage.includes('trading event');
+      return stage.includes('simulator') || stage.includes('projectx') || stage.includes('trading event') || stage.includes('order');
     }
 
     if (filter === 'risk') {
-      return stage.includes('rules') || stage.includes('intervention') || stage.includes('risk') || stage.includes('coach check-in');
+      return stage.includes('rules') || stage.includes('intervention') || stage.includes('risk') || stage.includes('coach check-in') || stage.includes('order gate');
     }
 
     if (filter === 'api') {
@@ -2238,6 +2583,20 @@ elements.plannedLoss.addEventListener('click', () => simulateTrade('plannedLoss'
 elements.oversizeTrade.addEventListener('click', () => simulateTrade('oversizeTrade'));
 elements.revengeTrade.addEventListener('click', () => simulateTrade('revengeTrade'));
 elements.resetSession.addEventListener('click', resetSession);
+elements.tradeTicketForm.addEventListener('submit', (event) => {
+  event.preventDefault();
+  previewGuardedOrder();
+});
+elements.previewOrder.addEventListener('click', previewGuardedOrder);
+elements.submitGuardedOrder.addEventListener('click', submitGuardedOrder);
+elements.cancelOpenOrders.addEventListener('click', () => requestEmergencyAction('cancel-open'));
+elements.flattenPositions.addEventListener('click', () => requestEmergencyAction('flatten'));
+[elements.ticketSize, elements.ticketEstimatedRisk, elements.ticketStopLossPrice, elements.ticketSetup].forEach((field) => {
+  field.addEventListener('input', () => {
+    state.execution.lastPreview = null;
+    renderTradeTicket();
+  });
+});
 elements.sendCheckInReply.addEventListener('click', sendCoachCheckInReply);
 elements.coachCheckInInput.addEventListener('keydown', (event) => {
   if (event.key === 'Enter' && !event.shiftKey) {

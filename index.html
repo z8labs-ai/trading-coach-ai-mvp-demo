@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trading Coach AI MVP</title>
-  <link rel="stylesheet" href="styles.css?v=mockup-2">
+  <link rel="stylesheet" href="styles.css?v=guarded-v1">
 </head>
 <body>
   <div id="authGate" class="auth-gate">
@@ -351,6 +351,67 @@
             <ul id="reflectionHistory" class="reflection-history"></ul>
           </details>
 
+          <details class="panel trade-ticket-panel collapsible-panel" open>
+            <summary class="panel-header">
+              <h2>Guarded Trade Ticket</h2>
+              <span id="executionModeStatus">Simulated</span>
+            </summary>
+            <form id="tradeTicketForm" class="trade-ticket-form">
+              <div class="ticket-grid">
+                <label>
+                  Account
+                  <input id="ticketAccountId" type="text" value="SIM-1001" autocomplete="off">
+                </label>
+                <label>
+                  Contract
+                  <input id="ticketContractId" type="text" value="CON.F.US.MNQ.M26" autocomplete="off">
+                </label>
+                <label>
+                  Side
+                  <select id="ticketSide">
+                    <option value="buy">Buy</option>
+                    <option value="sell">Sell</option>
+                  </select>
+                </label>
+                <label>
+                  Order Type
+                  <select id="ticketOrderType">
+                    <option value="market">Market</option>
+                    <option value="limit">Limit</option>
+                    <option value="stop">Stop</option>
+                    <option value="stop_limit">Stop Limit</option>
+                  </select>
+                </label>
+                <label>
+                  Contracts
+                  <input id="ticketSize" type="number" min="1" step="1" value="1">
+                </label>
+                <label>
+                  Estimated Risk
+                  <input id="ticketEstimatedRisk" type="number" min="0" step="25" value="250">
+                </label>
+                <label>
+                  Stop Loss Price
+                  <input id="ticketStopLossPrice" type="number" step="0.25" placeholder="Required">
+                </label>
+                <label>
+                  Limit / Stop Price
+                  <input id="ticketLimitPrice" type="number" step="0.25" placeholder="Optional">
+                </label>
+              </div>
+              <label>
+                Setup Tag
+                <input id="ticketSetup" type="text" value="Opening range breakout" autocomplete="off">
+              </label>
+              <div class="button-grid">
+                <button id="previewOrder" type="button">Preview Risk</button>
+                <button id="submitGuardedOrder" type="button">Submit Simulated Order</button>
+              </div>
+            </form>
+            <div id="tradeTicketStatus" class="ticket-status">Build an order intent, then preview it before submit.</div>
+            <ul id="tradeTicketReasons" class="status-list ticket-reasons"></ul>
+          </details>
+
           <details class="panel controls-panel collapsible-panel">
             <summary class="panel-header">
               <h2>Intervention Controls</h2>
@@ -366,6 +427,23 @@
               <button id="resetSession" class="danger">Reset Session</button>
             </div>
             <button id="syncProjectXMock" type="button" class="wide-demo-button">Sync Mock ProjectX Data</button>
+          </details>
+
+          <details class="panel emergency-panel collapsible-panel">
+            <summary class="panel-header">
+              <h2>Emergency Protection</h2>
+              <span id="emergencyModeStatus">Attempt only</span>
+            </summary>
+            <p class="safety-copy">Cancel and flatten controls are backend-only and disabled unless real execution is explicitly armed.</p>
+            <label class="checkbox-row">
+              <input id="emergencyConfirm" type="checkbox">
+              I understand this attempts protection actions and cannot guarantee a platform lockout.
+            </label>
+            <div class="button-grid">
+              <button id="cancelOpenOrders" type="button" class="warning">Cancel Open Orders</button>
+              <button id="flattenPositions" type="button" class="danger">Flatten Positions</button>
+            </div>
+            <div id="emergencyActionStatus" class="ticket-status">No emergency action attempted.</div>
           </details>
 
           <details class="panel next-action-panel collapsible-panel" open>
@@ -398,6 +476,7 @@
               <ul class="status-list">
                 <li><span>OpenAI voice</span><strong id="openAiApiStatus">Unknown</strong></li>
                 <li><span>ProjectX data</span><strong id="projectXApiStatus">Unknown</strong></li>
+                <li><span>ProjectX execution</span><strong id="projectXExecutionStatus">Disabled</strong></li>
               </ul>
               <div class="button-grid">
                 <button id="refreshApiStatus" type="button">Refresh API Status</button>
@@ -455,6 +534,6 @@
       apiBaseUrl: ''
     };
   </script>
-  <script src="app.js?v=mockup-2"></script>
+  <script src="app.js?v=guarded-v1"></script>
 </body>
 </html>

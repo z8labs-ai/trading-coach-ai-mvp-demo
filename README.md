@@ -15,6 +15,10 @@ The goal is to prove the core product loop:
 - Uses a simulator adapter instead of a real broker.
 - Includes a safe ProjectX mock sync path for testing future API-shaped data.
 - Includes a local API bridge for OpenAI Realtime voice and ProjectX read-only data.
+- Adds a guarded trade ticket that turns order entry into an order intent before anything can reach a broker.
+- Runs a pre-trade risk gate against daily loss, max contracts, max trades, cooldown/check-in/lockout state, stop-loss fields, and approved setup tags.
+- Logs approved and rejected order intents in the local event log so the coach can respond before a real order is sent.
+- Adds backend-only ProjectX execution route shells for preview, submit, cancel-open-orders, and flatten-positions.
 - Supports Clerk-managed authentication for Google login and passkeys when Clerk keys are configured.
 - Lets you define a pre-market plan.
 - Calculates max daily loss from account capital and selected risk tier.
@@ -42,6 +46,8 @@ The goal is to prove the core product loop:
 - It does not place trades.
 - It does not block real orders.
 - It does not enforce real broker lockouts.
+- It does not guarantee emergency flatten/cancel success.
+- It does not enable real ProjectX execution unless backend auth is configured and `ENABLE_REAL_EXECUTION=true`.
 - It does not store broker credentials.
 - It does not put broker credentials or OpenAI API keys in frontend code.
 - It does not make broker network calls unless local ProjectX credentials are configured.
@@ -113,8 +119,26 @@ Important local variables:
 - `PROJECTX_USERNAME`
 - `PROJECTX_API_KEY`
 - `PROJECTX_ACCOUNT_ID`
+- `ENABLE_REAL_EXECUTION`
+- `EXECUTION_MAX_BATCH_ACTIONS`
 
-The ProjectX integration is intentionally read-only. It can authenticate, fetch accounts, fetch positions, fetch orders, and fetch trades. It does not place, modify, cancel, close, flatten, or block trades.
+The ProjectX integration is read-only by default. It can authenticate, fetch accounts, fetch positions, fetch orders, and fetch trades.
+
+The backend also contains disabled-by-default guarded execution route shells:
+
+- `POST /api/projectx/order/preview`
+- `POST /api/projectx/order/submit`
+- `POST /api/projectx/orders/cancel-open`
+- `POST /api/projectx/positions/flatten`
+
+`order/preview` validates the shape of an order intent. The execution routes refuse to run unless:
+
+1. Clerk backend auth is configured.
+2. Auth is required for backend routes.
+3. ProjectX credentials exist only on the backend.
+4. `ENABLE_REAL_EXECUTION=true`.
+
+Keep `ENABLE_REAL_EXECUTION=false` while building and while running the public demo. Emergency cancel and flatten actions are treated as attempted broker actions, not guaranteed shutdowns or native account locks.
 
 ## Deployed backend mode
 
@@ -135,7 +159,7 @@ Required production rules:
 3. Set `REQUIRE_AUTH=true` or `NODE_ENV=production` before deploying real OpenAI or ProjectX keys.
 4. Configure Clerk before enabling protected API features in production.
 5. Use HTTPS for the deployed backend.
-6. Keep ProjectX read-only until the product is ready for stricter controls.
+6. Keep `ENABLE_REAL_EXECUTION=false` until the product is ready for guarded execution testing with real accounts.
 7. Do not expose `.env`, broker credentials, or OpenAI keys to the browser.
 
 Frontend backend selection:
@@ -164,6 +188,29 @@ The MVP now separates event input from risk logic:
 6. The event log records the local flow so you can debug what happened.
 
 This keeps the rules engine independent from the simulator. A future broker adapter should emit the same normalized event shape, so the rules and intervention logic do not need to know where the event came from.
+
+## Guarded trading path
+
+Version 1 is moving toward guarded trading instead of companion-only monitoring.
+
+Trade-through flow:
+
+1. The trader builds an order in the Guarded Trade Ticket.
+2. The ticket creates an `order_intent`.
+3. The pre-trade risk gate approves or rejects the intent.
+4. Rejected intents become `order_rejected` events and coach messages.
+5. Approved simulator intents become `order_approved` and `order_submitted` audit events.
+6. Future ProjectX execution can use the backend-only submit route after all safety switches are enabled.
+
+Emergency flow:
+
+1. A serious rule breach can recommend protection.
+2. The trader confirms the emergency disclaimer.
+3. The app logs `risk_action_requested`.
+4. Backend routes can attempt cancel-open-orders or flatten-positions only when real execution is armed.
+5. The result is logged as `orders_cancelled`, `positions_flattened`, or `risk_action_failed`.
+
+The public demo remains simulator-only. It can show the UI, risk gate, order rejection reasons, coach messages, and audit log, but it cannot place, cancel, or flatten real ProjectX trades.
 
 ## Capital-based risk plan
 

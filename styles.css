@@ -479,6 +479,78 @@ input[readonly] {
   color: var(--yellow);
 }
 
+.trade-ticket-form {
+  display: grid;
+  gap: 12px;
+}
+
+.ticket-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.trade-ticket-panel {
+  border-color: rgba(54, 197, 255, 0.42);
+}
+
+.trade-ticket-panel .button-grid,
+.emergency-panel .button-grid {
+  margin-top: 2px;
+}
+
+.ticket-status {
+  margin-top: 12px;
+  border: 1px solid rgba(36, 70, 92, 0.55);
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: rgba(8, 20, 29, 0.55);
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.ticket-status.approved {
+  border-color: rgba(45, 240, 138, 0.55);
+  color: #c8f9df;
+  background: rgba(45, 240, 138, 0.08);
+}
+
+.ticket-status.blocked {
+  border-color: rgba(255, 75, 110, 0.72);
+  color: #ffd3dc;
+  background: rgba(255, 75, 110, 0.08);
+}
+
+.ticket-reasons {
+  margin-top: 10px;
+}
+
+.emergency-panel {
+  border-color: rgba(255, 143, 61, 0.52);
+  background:
+    linear-gradient(180deg, rgba(255, 143, 61, 0.055), transparent 130px),
+    var(--panel);
+}
+
+.safety-copy {
+  margin-bottom: 12px;
+  color: #dcecf4;
+  line-height: 1.45;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 12px;
+  line-height: 1.35;
+}
+
+.checkbox-row input {
+  width: auto;
+  margin-top: 2px;
+}
+
 .metric-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   margin-bottom: 14px;
@@ -1124,6 +1196,11 @@ button:hover {
 button.danger {
   background: linear-gradient(135deg, #ff4b6e, #b3153b);
   box-shadow: 0 10px 24px rgba(255, 75, 110, 0.18);
+}
+
+button.warning {
+  background: linear-gradient(135deg, #ffb545, #a85c10);
+  box-shadow: 0 10px 24px rgba(255, 181, 69, 0.16);
 }
 
 button:disabled,
